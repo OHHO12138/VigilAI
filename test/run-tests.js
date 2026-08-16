@@ -58,7 +58,7 @@ async function main() {
     const cfg = config.getConfig();
     assert.strictEqual(cfg.opacity, 0.5);
     assert.strictEqual(cfg.appearance.fontSize, 14);
-    assert.strictEqual(cfg.appearance.bgColor, 'rgba(33,30,30,0.76)'); // 未打补丁的保留
+    assert.strictEqual(cfg.appearance.bgColor, 'rgba(24, 24, 27, 0.88)'); // 未打补丁的保留
     // 重新 init 验证持久化
     config.initConfig(dir);
     assert.strictEqual(config.getConfig().appearance.fontSize, 14);

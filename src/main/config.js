@@ -15,11 +15,11 @@ const DEFAULT_CONFIG = {
   locale: 'zh',
   appearance: {
     borderWidth: 8,
-    bgColor: 'rgba(33,30,30,0.76)',
-    cardBgColor: 'rgba(43,40,40,0.82)',
-    ringTrackColor: 'rgba(255,255,255,0.12)',
-    ringUsedColor: 'rgba(255,255,255,0.92)',
-    fontColor: '#F1ECEC',
+    bgColor: 'rgba(24, 24, 27, 0.88)',
+    cardBgColor: 'rgba(39, 39, 42, 0.86)',
+    ringTrackColor: 'rgba(255, 255, 255, 0.10)',
+    ringUsedColor: 'rgba(250, 250, 250, 0.95)',
+    fontColor: '#FAFAFA',
     fontSize: 11,
   },
   alert: {

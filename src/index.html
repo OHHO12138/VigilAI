@@ -13,8 +13,21 @@
   <div class="app-content">
 
     <div id="title-bar" class="title-bar drag-region">
+      <span class="title-logo" aria-hidden="true">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="vigilai-logo-grad" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#6d5df6"/>
+              <stop offset="1" stop-color="#a855f7"/>
+            </linearGradient>
+          </defs>
+          <rect x="2" y="2" width="20" height="20" rx="5.5" fill="url(#vigilai-logo-grad)"/>
+          <path d="M8 9l4 6.5L16 9" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
       <span class="title-text" data-i18n="app.title">VigilAI</span>
       <div class="title-controls title-controls-main no-drag">
+        <button id="btn-refresh" class="title-btn" data-i18n-title="title.refresh" title="刷新全部">⟳</button>
         <button id="btn-settings" class="title-btn" data-i18n-title="title.settings" title="设置">⚙</button>
         <button id="btn-layout" class="title-btn" data-i18n-title="title.layoutHorizontal" title="横向排列">▼</button>
         <button id="btn-pin" class="title-btn" data-i18n-title="title.pin" title="窗口置顶">▲</button>

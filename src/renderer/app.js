@@ -189,6 +189,10 @@ function wireTitleBar() {
 
   $('#btn-minimize').addEventListener('click', () => api.minimizeWindow());
   $('#btn-close').addEventListener('click', () => api.hideWindow());
+  $('#btn-refresh').addEventListener('click', async () => {
+    const list = await api.listMonitors();
+    for (const m of list) api.refreshMonitor(m.id);
+  });
   $('#btn-settings').addEventListener('click', () => openSettings({ onConfigChange, onMonitorsChanged: reloadMonitors }));
 }
 
