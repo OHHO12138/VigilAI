@@ -38,4 +38,4 @@ function destroyTray() {
   tray = null;
 }
 
-module.exports = { createTray, destroyTray, toggleWindow };
+module.exports = { createTray, destroyTray };

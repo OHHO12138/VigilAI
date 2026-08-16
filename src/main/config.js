@@ -192,5 +192,4 @@ module.exports = {
   removeMonitor,
   reorderMonitors,
   deepMerge,
-  DEFAULT_CONFIG,
 };

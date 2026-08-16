@@ -1,4 +1,4 @@
-# Plan Usage 架构设计
+# VigilAI 架构设计
 
 大模型订阅用量 / 余额桌面悬浮监控。Electron 28 + 原生 JS/CSS（渲染进程 ESM，主进程 CommonJS），仅 Windows。原型为 OpenCode-Glance（仅取其用量圆盘模块与窗口机制，剥离指令面板）。
 

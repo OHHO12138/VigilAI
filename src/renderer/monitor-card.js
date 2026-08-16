@@ -8,7 +8,7 @@ const RADIUS = 26;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 const PERIODS = ['fiveHours', 'week', 'month'];
 
-export function formatTime(updatedAt) {
+function formatTime(updatedAt) {
   if (!updatedAt) return t('card.never');
   const d = new Date(updatedAt);
   return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
@@ -109,7 +109,7 @@ export function buildErrorBody(monitor, entry) {
   ]);
 }
 
-export function renderUsageCard(elm, monitor) {
+function renderUsageCard(elm, monitor) {
   const entry = getEntry(monitor.id);
   elm.innerHTML = '';
   elm.classList.toggle('disabled', !monitor.enabled);

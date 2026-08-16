@@ -686,7 +686,7 @@ export function openSettings(h) {
   renderSettings();
 }
 
-export function closeSettings() {
+function closeSettings() {
   if (overlay) overlay.style.display = 'none';
   editingId = null;
   draft = null;

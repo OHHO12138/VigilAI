@@ -107,6 +107,4 @@ module.exports = {
   fetchBalance,
   parseTokenPlan,
   parseMinimaxBalance,
-  usedPercent,
-  DEFAULT_BASE_URL,
 };

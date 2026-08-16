@@ -87,6 +87,4 @@ module.exports = {
   startAll,
   stopAll,
   rescheduleAll: startAll,
-  CACHE_TTL_MS,
-  INTERVAL_MINUTES,
 };

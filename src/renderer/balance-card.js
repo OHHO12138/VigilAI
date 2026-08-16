@@ -15,7 +15,7 @@ function formatBalance(value) {
   return value.toFixed(2);
 }
 
-export function renderBalanceCard(elm, monitor) {
+function renderBalanceCard(elm, monitor) {
   const entry = getEntry(monitor.id);
   elm.innerHTML = '';
   elm.classList.toggle('disabled', !monitor.enabled);

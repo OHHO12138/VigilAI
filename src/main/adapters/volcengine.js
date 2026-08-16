@@ -141,6 +141,4 @@ module.exports = {
   fetchBalance,
   signVolc,
   parseVolcBalance,
-  canonicalQuery,
-  uriEncode,
 };

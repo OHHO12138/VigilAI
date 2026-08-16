@@ -476,11 +476,8 @@ function heuristicIsReady(result, monitor) {
 module.exports = {
   makeAdapter,
   login,
-  fetchPage,
   hasAuth,
   clearAuth,
-  readCapture,
-  saveCapture,
   HEURISTIC_EXTRACT_JS,
   parseUsageCandidates,
   parseBalanceCandidates,
@@ -488,5 +485,4 @@ module.exports = {
   heuristicShouldThrow,
   heuristicIsReady,
   clampPercent,
-  CHROME_UA,
 };

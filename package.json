@@ -27,7 +27,6 @@
       "preload.js",
       "src/**/*",
       "skill/**/*",
-      "assets/**/*",
       "build/**"
     ],
     "win": {
