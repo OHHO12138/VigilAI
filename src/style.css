@@ -55,6 +55,9 @@ body {
   /* 外角半径 = 8px 基础弧度 + 边框粗细，保证任意边框厚度下边框环四角都是同心圆弧，
      不会出现边框自身连接的直角 */
   border-radius: calc(8px + var(--app-border-width));
+  /* border-radius 只裁剪背景/边框；backdrop-filter 毛玻璃在透明窗口四角会泄漏成方形，
+     用 clip-path 连同合成层一起裁剪，保证边框粗细为 0 时窗口仍是圆弧形 */
+  clip-path: inset(0 round calc(8px + var(--app-border-width)));
   overflow: visible;
 }
 
