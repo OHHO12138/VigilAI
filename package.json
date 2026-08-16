@@ -1,0 +1,61 @@
+{
+  "name": "vigilai",
+  "version": "0.7.1",
+  "description": "VigilAI - 大模型订阅用量/余额桌面悬浮监控，多厂商多账号，用量圆盘+余额卡片",
+  "main": "main.js",
+  "author": "VigilAI",
+  "license": "MIT",
+  "scripts": {
+    "start": "set ELECTRON_RUN_AS_NODE=&& electron .",
+    "dev": "set ELECTRON_RUN_AS_NODE=&& electron . --dev",
+    "test": "node test/run-tests.js",
+    "build": "electron-builder --win",
+    "build:portable": "electron-builder --win portable"
+  },
+  "devDependencies": {
+    "electron": "^28.3.3",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.vigilai.app",
+    "productName": "VigilAI",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "src/**/*",
+      "skill/**/*",
+      "assets/**/*",
+      "build/**"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.ico",
+      "signAndEditExecutable": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "shortcutName": "VigilAI"
+    },
+    "portable": {
+      "artifactName": "VigilAI-v${version}.exe"
+    }
+  }
+}
