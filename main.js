@@ -64,6 +64,14 @@ if (!gotSingleInstanceLock) {
     app.whenReady().then(() => {
       initConfig(app.getPath('userData'));
 
+      // 启动时同步开机自启状态到注册表
+      try {
+        const cfg = config.getConfig();
+        app.setLoginItemSettings({ openAtLogin: !!cfg.autoStart });
+      } catch (e) {
+        console.error('Failed to sync login item:', e);
+      }
+
       monitor.initMonitor({
         adapters,
         ctx: { app, safeStorage },

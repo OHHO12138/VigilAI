@@ -38,6 +38,10 @@ contextBridge.exposeInMainWorld('api', {
   // 文件选择
   pickImage: () => ipcRenderer.invoke('dialog:pick-image'),
 
+  // 开机自启
+  getAutoStart: () => ipcRenderer.invoke('auto-start:get'),
+  setAutoStart: (enabled) => ipcRenderer.invoke('auto-start:set', enabled),
+
   // 推送
   onMonitorData: (callback) => {
     ipcRenderer.on('monitor:data', (_event, payload) => callback(payload));

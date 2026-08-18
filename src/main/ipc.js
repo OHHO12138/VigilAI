@@ -1,4 +1,4 @@
-const { ipcMain, dialog, screen, shell } = require('electron');
+const { app, ipcMain, dialog, screen, shell } = require('electron');
 const config = require('./config');
 const monitor = require('./monitor');
 const adapters = require('./adapters');
@@ -66,6 +66,21 @@ function setupIPC() {
   ipcMain.handle('config:get', () => config.getConfig());
 
   ipcMain.handle('config:patch', (_event, patch) => config.patchConfig(patch || {}));
+
+  // ---- 开机自启 ----
+  ipcMain.handle('auto-start:get', () => {
+    return !!config.getConfig().autoStart;
+  });
+
+  ipcMain.handle('auto-start:set', (_event, enabled) => {
+    config.patchConfig({ autoStart: !!enabled });
+    try {
+      app.setLoginItemSettings({ openAtLogin: !!enabled });
+    } catch (e) {
+      console.error('Failed to set login item:', e);
+    }
+    return !!enabled;
+  });
 
   // ---- monitors CRUD ----
   ipcMain.handle('monitors:list', () => config.listMonitors());

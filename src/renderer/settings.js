@@ -672,6 +672,29 @@ function buildLanguageSection() {
   ]);
 }
 
+// ---------- 开机自启 ----------
+
+function buildAutoStartSection() {
+  const toggle = el('input', {
+    type: 'checkbox',
+    onchange: async (e) => {
+      const ok = await window.api.setAutoStart(e.target.checked);
+      if (!ok) e.target.checked = false;
+      showToast(ok ? t('toast.saved') : t('toast.loginFailed'), ok ? 'info' : 'error');
+    },
+  });
+  // 异步读取当前状态
+  window.api.getAutoStart().then((v) => { toggle.checked = !!v; });
+
+  return el('section', { class: 'settings-section' }, [
+    el('h4', {}, t('settings.autoStart')),
+    el('label', { class: 'form-field form-check' }, [
+      toggle,
+      el('span', {}, t('settings.autoStart')),
+    ]),
+  ]);
+}
+
 // ---------- 面板骨架 ----------
 
 export function openSettings(h) {
@@ -709,6 +732,7 @@ export function renderSettings() {
         buildMonitorsSection(),
         buildAppearanceSection(),
         buildAlertSection(),
+        buildAutoStartSection(),
         buildLanguageSection(),
       ]),
     ])

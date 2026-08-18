@@ -22,6 +22,7 @@ const DEFAULT_CONFIG = {
     fontColor: '#FAFAFA',
     fontSize: 11,
   },
+  autoStart: false,
   alert: {
     mode: 'dot',
     threshold1: 50,

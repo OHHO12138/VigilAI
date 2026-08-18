@@ -33,6 +33,7 @@ const zh = {
   'settings.appearance': '外观',
   'settings.alert': '预警',
   'settings.language': '语言',
+  'settings.autoStart': '开机自启',
   'settings.close': '关闭',
 
   'monitor.add': '新增监控项',
@@ -151,6 +152,7 @@ const en = {
   'settings.appearance': 'Appearance',
   'settings.alert': 'Alert',
   'settings.language': 'Language',
+  'settings.autoStart': 'Start on boot',
   'settings.close': 'Close',
 
   'monitor.add': 'Add monitor',
