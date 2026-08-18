@@ -152,61 +152,6 @@ body {
 
 /* ---- 横向模式：左侧标题列 + 监控项横向排布 ---- */
 
-#app.layout-horizontal .app-content {
-  flex-direction: row;
-}
-
-#app.layout-horizontal .title-bar {
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 5px;
-  padding: 8px 8px 10px;
-  border-bottom: none;
-  border-right: 1px solid var(--border);
-  flex: 0 0 auto;
-}
-
-#app.layout-horizontal .title-logo {
-  margin-bottom: 5px;
-}
-
-#app.layout-horizontal .title-text {
-  margin-top: 0;
-  text-align: center;
-  line-height: 1.25;
-  white-space: pre-line;
-  max-width: 52px;
-}
-
-#app.layout-horizontal .title-controls-aux {
-  order: -1;
-  gap: 4px;
-}
-
-#app.layout-horizontal .title-controls-main {
-  margin-left: 0;
-  gap: 4px;
-}
-
-#app.layout-horizontal .cards {
-  flex-direction: row;
-  align-items: flex-start;
-  overflow-x: auto;
-  overflow-y: hidden;
-}
-
-#app.layout-horizontal .card {
-  width: var(--h-card-width, 388px);
-  flex: 0 0 auto;
-}
-
-#app.layout-horizontal .empty-state {
-  flex: 0 0 auto;
-  width: var(--h-card-width, 388px);
-  min-height: 110px;
-}
-
 /* 细滚动条，贴合整体灰白主题 */
 ::-webkit-scrollbar {
   width: 5px;

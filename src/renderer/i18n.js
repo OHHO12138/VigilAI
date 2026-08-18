@@ -4,8 +4,6 @@
 const zh = {
   'app.title': 'VigilAI',
   'title.settings': '设置',
-  'title.layoutHorizontal': '横向排列',
-  'title.layoutVertical': '恢复竖排',
   'title.pin': '窗口置顶',
   'title.opacity': '透明度',
   'title.minimize': '最小化',
@@ -126,8 +124,6 @@ const zh = {
 const en = {
   'app.title': 'VigilAI',
   'title.settings': 'Settings',
-  'title.layoutHorizontal': 'Horizontal layout',
-  'title.layoutVertical': 'Vertical layout',
   'title.pin': 'Always on top',
   'title.opacity': 'Opacity',
   'title.minimize': 'Minimize',
