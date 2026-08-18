@@ -30,6 +30,7 @@ const preset = {
   loginUrl: `${ORIGIN}/`,
   origin: ORIGIN,
   isLoggedIn,
+  targetUrl: `${ORIGIN}/#/console/balance`,
   // 不设 successUrlPattern，用 isLoggedIn 函数判定
   // 也不设 cookieName（小米 STS 用 httpOnly cookie，JS 读不到）
   buildExtractJs() {
