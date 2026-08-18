@@ -1,27 +1,24 @@
 // PackyAPI 官网同步：基于 web-sync 引擎 + PackyAPI 控制台专用提取脚本。
-// 专用脚本聚焦余额展示区域，排除导航干扰，比通用启发式更稳定。
+// 采用全量关键词扫描 + 排除导航区域，比 CSS 选择器更通用可靠。
 const websync = require('./web-sync');
 
-// PackyAPI 控制台专用提取：聚焦主要内容区，排除 header/nav/sidebar 干扰
 const PACKYAPI_EXTRACT_JS = `(function() {
   const out = { amountCandidates: [], isLoginPage: false, url: location.href, title: document.title };
   try {
     out.isLoginPage = !!document.querySelector('input[type="password"]');
     if (out.isLoginPage) return out;
 
-    // 策略1：查找余额相关容器（class/id 含 balance/remain/credit/quota/amount/billing）
-    const containers = document.querySelectorAll(
-      '[class*="balance" i],[class*="remain" i],[class*="credit" i],' +
-      '[class*="quota" i],[class*="amount" i],[class*="billing" i],' +
-      '[class*="available" i],[class*="summary" i],[class*="usage" i],' +
-      '[id*="balance" i],[id*="remain" i],[id*="credit" i]'
-    );
-
+    const skip = 'nav,header,footer,aside,.nav,.sidebar,.header,.footer,.menu,.toolbar,.breadcrumb';
     const seen = new Set();
-    for (const c of containers) {
-      const t = (c.textContent || '').replace(/\\s+/g, ' ').trim();
-      if (!t || t.length > 80) continue;
-      const m = t.match(/(\\$|US\\$|USD)?\\s*(\\d+(?:,\\d{3})*(?:\\.\\d{1,2})?)/);
+    const els = document.querySelectorAll('span,p,div,td,dd,strong,em,h1,h2,h3,h4');
+
+    for (const el of els) {
+      if (el.children.length > 3) continue;
+      if (el.closest(skip)) continue;
+      const t = (el.textContent || '').replace(/\\s+/g, ' ').trim();
+      if (!t || t.length > 60) continue;
+      if (!/(余额|可用|剩余|现金|balance|available|remain|credit|cash)/i.test(t)) continue;
+      const m = t.match(/(¥|￥|\\$|US\\$|RMB|CNY|USD)?\\s*(\\d+(?:,\\d{3})*(?:\\.\\d{1,2})?)/);
       if (m) {
         const num = parseFloat(m[2].replace(/,/g, ''));
         if (isFinite(num) && num >= 0) {
@@ -33,30 +30,6 @@ const PACKYAPI_EXTRACT_JS = `(function() {
         }
       }
     }
-
-    // 策略2：查找包含余额关键词的小元素（补充）
-    if (out.amountCandidates.length < 2) {
-      const main = document.querySelector('main,[role="main"],.main-content,.content,.page-content,.dashboard') || document.body;
-      const els = main.querySelectorAll('span,p,div,td,dd,strong,em');
-      for (const el of els) {
-        if (el.children.length > 3) continue;
-        const t = (el.textContent || '').replace(/\\s+/g, ' ').trim();
-        if (!t || t.length > 60) continue;
-        if (!/(余额|可用|剩余|balance|available|remain|credit)/i.test(t)) continue;
-        const m = t.match(/(\\$|US\\$|USD|¥|￥)?\\s*(\\d+(?:,\\d{3})*(?:\\.\\d{1,2})?)/);
-        if (m) {
-          const num = parseFloat(m[2].replace(/,/g, ''));
-          if (isFinite(num) && num >= 0) {
-            const key = num + ':' + t.slice(0, 40);
-            if (!seen.has(key)) {
-              seen.add(key);
-              out.amountCandidates.push({ label: t.slice(0, 80), amount: num, symbol: m[1] || '' });
-            }
-          }
-        }
-      }
-    }
-
     out.amountCandidates = out.amountCandidates.slice(0, 20);
   } catch (e) {
     out.error = String(e);
