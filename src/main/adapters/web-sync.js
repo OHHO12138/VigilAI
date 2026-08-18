@@ -27,6 +27,7 @@ const LOGIN_TIMEOUT_MS = 5 * 60 * 1000;
 const FETCH_TIMEOUT_MS = 30000;
 const POLL_MAX = 30;
 const POLL_INTERVAL_MS = 1000;
+const STABLE_POLLS = 3; // 连续N次提取结果一致才接受
 
 function electron() {
   return require('electron');
@@ -305,15 +306,33 @@ async function fetchPage(preset, monitor, ctx) {
 
     win.webContents.on('did-finish-load', async () => {
       try {
+        let prevKey = '';
+        let stableCount = 0;
         for (let i = 0; i < POLL_MAX; i++) {
           const result = await win.webContents.executeJavaScript(extractJs);
           if (preset.shouldThrow) {
             const err = preset.shouldThrow(result, monitor);
             if (err) throw err;
           }
+          // 稳定化：连续 STABLE_POLLS 次提取结果一致才接受，避免 SPA 页面渐进渲染导致取到中间态数据
+          const key = JSON.stringify(result);
           if (isReady(result, monitor)) {
-            finish(null, preset.parse(result, monitor));
-            return;
+            if (key === prevKey) {
+              stableCount++;
+              if (stableCount >= STABLE_POLLS) {
+                const parsed = preset.parse(result, monitor);
+                if (parsed) {
+                  finish(null, parsed);
+                  return;
+                }
+              }
+            } else {
+              stableCount = 1;
+            }
+            prevKey = key;
+          } else {
+            prevKey = '';
+            stableCount = 0;
           }
           await sleep(POLL_INTERVAL_MS);
         }
@@ -365,9 +384,12 @@ const HEURISTIC_EXTRACT_JS = `(function() {
   try {
     out.isLoginPage = !!document.querySelector('input[type="password"]');
     const seen = new Set();
+    // 排除导航、页头、页脚、侧栏等非内容区域，减少误抓
+    const skip = 'nav,header,footer,aside,.nav,.sidebar,.header,.footer,.menu,.toolbar,.breadcrumb';
     const els = document.querySelectorAll('body *');
     for (const el of els) {
       if (el.children.length > 3) continue;
+      if (el.closest(skip)) continue;
       const t = (el.textContent || '').replace(/\\s+/g, ' ').trim();
       if (!t || t.length > 60) continue;
       const prev = el.previousElementSibling ? el.previousElementSibling.textContent : '';
@@ -382,7 +404,7 @@ const HEURISTIC_EXTRACT_JS = `(function() {
         }
         continue;
       }
-      if (/(余额|可用|现金|balance|available|cash)/i.test(t + ' ' + label)) {
+      if (/(余额|可用|现金|剩余|balance|available|cash|remain)/i.test(t + ' ' + label)) {
         const am = t.match(/(¥|￥|\\$|US\\$|RMB|CNY|USD)?\\s*(\\d+(?:,\\d{3})*(?:\\.\\d{1,2})?)/);
         if (am) {
           const num = parseFloat(am[2].replace(/,/g, ''));
@@ -424,14 +446,15 @@ function parseUsageCandidates(candidates) {
   return Object.keys(periods).length ? { periods } : null;
 }
 
-// 纯函数：金额候选 → {balance, currency}。优先"可用"，其次"余额/balance"
+// 纯函数：金额候选 → {balance, currency}。优先"可用/剩余"，其次"余额/balance"
 function parseBalanceCandidates(candidates, currencyHint) {
   if (!Array.isArray(candidates)) return null;
   const score = (c) => {
     const label = c.label || '';
-    if (/可用/.test(label)) return 0;
+    if (/可用|剩余|available|remain/i.test(label)) return 0;
     if (/余额/.test(label)) return 1;
-    if (/(available|balance)/i.test(label)) return 2;
+    if (/(balance)/i.test(label)) return 2;
+    if (/充值|recharge|topup|deposit/i.test(label)) return 4; // 充值金额不是余额
     return 3;
   };
   const sorted = candidates.filter((c) => c && typeof c.amount === 'number').sort((a, b) => score(a) - score(b));
