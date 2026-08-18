@@ -314,7 +314,11 @@ async function fetchPage(preset, monitor, ctx) {
           const result = await win.webContents.executeJavaScript(extractJs);
           if (preset.shouldThrow) {
             const err = preset.shouldThrow(result, monitor);
-            if (err) throw err;
+            if (err) {
+              // session 过期：清除 capture 文件，让设置面板显示"未登录"
+              clearAuth(preset, ctx);
+              throw err;
+            }
           }
           // 稳定化：连续 STABLE_POLLS 次提取结果一致才接受，避免 SPA 页面渐进渲染导致取到中间态数据
           const key = JSON.stringify(result);
