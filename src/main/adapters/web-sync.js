@@ -279,6 +279,8 @@ async function fetchPage(preset, monitor, ctx) {
       },
     });
     win.webContents.setUserAgent(CHROME_UA);
+    // 让隐藏窗口走系统代理（VPN/代理软件设置的端口），解决不开梯子取不到数据的问题
+    win.webContents.session.setProxy({ mode: 'system' }).catch(() => {});
 
     const finish = (err, data) => {
       if (settled) return;
