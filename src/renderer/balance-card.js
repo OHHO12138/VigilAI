@@ -55,6 +55,19 @@ function renderBalanceCard(elm, monitor) {
     }
   }
   elm.appendChild(el('div', { class: 'balance-value' }, children));
+  // 日/周消费统计
+  const stats = entry.data && entry.data.stats;
+  if (stats && (typeof stats.dayDelta === 'number' || typeof stats.weekDelta === 'number')) {
+    const sym = currencySymbol(monitor, entry.data);
+    const parts = [];
+    if (typeof stats.dayDelta === 'number') {
+      parts.push(el('span', { class: 'stats-item' }, `${t('stats.day')} ${stats.dayDelta >= 0 ? '+' : ''}${sym}${Math.abs(stats.dayDelta).toFixed(2)}`));
+    }
+    if (typeof stats.weekDelta === 'number') {
+      parts.push(el('span', { class: 'stats-item' }, `${t('stats.week')} ${stats.weekDelta >= 0 ? '+' : ''}${sym}${Math.abs(stats.weekDelta).toFixed(2)}`));
+    }
+    elm.appendChild(el('div', { class: 'balance-stats' }, parts));
+  }
   if (entry.error) elm.appendChild(buildErrorBody(monitor, entry));
 }
 

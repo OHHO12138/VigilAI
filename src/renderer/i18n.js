@@ -118,6 +118,9 @@ const zh = {
   'toast.loginSuccess': '登录成功',
   'toast.loginFailed': '登录失败',
   'toast.invalidForm': '请填写必填项',
+
+  'stats.day': '今日',
+  'stats.week': '本周',
 };
 
 const en = {
@@ -237,6 +240,9 @@ const en = {
   'toast.loginSuccess': 'Login success',
   'toast.loginFailed': 'Login failed',
   'toast.invalidForm': 'Please fill required fields',
+
+  'stats.day': 'Today',
+  'stats.week': 'Week',
 };
 
 const dicts = { zh, en };

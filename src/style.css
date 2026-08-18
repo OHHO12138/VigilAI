@@ -489,6 +489,18 @@ body {
   align-self: center;
 }
 
+.balance-stats {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  padding: 2px 0 4px;
+}
+
+.stats-item {
+  font-size: 0.85em;
+  opacity: 0.7;
+}
+
 /* ---- 设置面板 ---- */
 
 .settings-overlay {

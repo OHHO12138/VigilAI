@@ -1,6 +1,7 @@
 // 监控调度器：按每个 monitor 的 refresh.mode 调度取数，30s 内存缓存，结果经注入的 broadcast 推送。
 // electron 依赖（webContents 推送、app/safeStorage、适配器注册表）全部通过 initMonitor 注入，纯 node 可测。
 const config = require('./config');
+const history = require('./history');
 
 const CACHE_TTL_MS = 30 * 1000;
 const INTERVAL_MINUTES = [1, 5, 10, 30];
@@ -47,6 +48,11 @@ async function refreshMonitor(id, { force = false } = {}) {
       }
       const data =
         kind === 'balance' ? await adapter.fetchBalance(monitor, ctx) : await adapter.fetchUsage(monitor, ctx);
+      // balance 型记录历史并附加消费统计
+      if (kind === 'balance' && data && typeof data.balance === 'number') {
+        history.record(id, data.balance);
+        data.stats = history.computeStats(id);
+      }
       entry = { id, ok: true, data, updatedAt: Date.now(), error: null };
     } catch (e) {
       // 失败保留上次数据，附带 error

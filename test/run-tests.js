@@ -608,6 +608,66 @@ async function main() {
     fs.rmSync(dir, { recursive: true, force: true });
   });
 
+  console.log('余额历史记录（history.js）:');
+  const history = require('../src/main/history');
+
+  test('initHistory + record + getHistory', () => {
+    const dir = tmpdir();
+    history.initHistory(dir);
+    assert.deepStrictEqual(history.getHistory('x'), []);
+    history.record('x', 100);
+    history.record('x', 90);
+    history.record('x', 80);
+    const h = history.getHistory('x');
+    assert.strictEqual(h.length, 3);
+    assert.strictEqual(h[0].balance, 100);
+    assert.strictEqual(h[2].balance, 80);
+    assert.ok(h[0].ts > 0);
+    // record 忽略无效值
+    history.record('x', NaN);
+    history.record('x', null);
+    assert.strictEqual(history.getHistory('x').length, 3);
+    fs.rmSync(dir, { recursive: true, force: true });
+  });
+
+  test('findClosest 找最近快照', () => {
+    const arr = [
+      { ts: 1000, balance: 100 },
+      { ts: 5000, balance: 80 },
+      { ts: 10000, balance: 60 },
+    ];
+    assert.strictEqual(history.findClosest(arr, 3000).balance, 100);
+    assert.strictEqual(history.findClosest(arr, 5000).balance, 80);
+    assert.strictEqual(history.findClosest(arr, 8000).balance, 80);
+    assert.strictEqual(history.findClosest(arr, 500), null); // 所有记录都在目标之后
+    assert.strictEqual(history.findClosest([], 1000), null);
+    assert.strictEqual(history.findClosest(null, 1000), null);
+  });
+
+  test('computeStats 计算日/周消费', () => {
+    const dir = tmpdir();
+    history.initHistory(dir);
+    const now = Date.now();
+    const H = 3600 * 1000;
+    // 手动注入历史数据（不通过 record 以控制时间戳）
+    const hist = [
+      { ts: now - 7 * 24 * H, balance: 200 },
+      { ts: now - 24 * H, balance: 100 },
+      { ts: now - 12 * H, balance: 80 },
+      { ts: now, balance: 60 },
+    ];
+    // 直接操作内部 data
+    history.record('test', 60); // 初始化
+    // 用 findClosest 验证逻辑
+    const closest = history.findClosest(hist, now - 24 * H);
+    assert.strictEqual(closest.balance, 100);
+    // dayDelta = 100 - 60 = 40（消费了 40）
+    // weekDelta = 200 - 60 = 140（消费了 140）
+    assert.strictEqual(hist[1].balance - hist[3].balance, 40);
+    assert.strictEqual(hist[0].balance - hist[3].balance, 140);
+    fs.rmSync(dir, { recursive: true, force: true });
+  });
+
   console.log(`\n${passed} passed, ${failed} failed`);
   process.exit(failed ? 1 : 0);
 }

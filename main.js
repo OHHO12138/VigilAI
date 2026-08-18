@@ -9,6 +9,7 @@ const { acquireSingleInstance } = require('./src/main/single-instance');
 const { createTray, destroyTray } = require('./src/main/tray');
 const monitor = require('./src/main/monitor');
 const adapters = require('./src/main/adapters');
+const history = require('./src/main/history');
 
 // 固定用户数据目录为 %APPDATA%\VigilAI（与产品名一致），不受应用名命名规则影响。
 // 旧目录 %APPDATA%\plan-usage 已有数据时，首次启动复制迁移，避免配置丢失。
@@ -63,6 +64,7 @@ if (!gotSingleInstanceLock) {
 
     app.whenReady().then(() => {
       initConfig(app.getPath('userData'));
+      history.initHistory(app.getPath('userData'));
 
       // 启动时同步开机自启状态到注册表
       try {
