@@ -1,7 +1,7 @@
 // 渲染层编排：标题栏、卡片列表、设置面板、i18n 重渲染、数据流。
 // 数据流：init-state（config 快照）→ monitors:list → 每项 monitor:get 拿缓存渲染
 // （无缓存的触发一次 monitor:refresh）→ onMonitorData 更新对应卡片。
-import { $, $$, el, deepMerge } from './dom.js';
+import { $, el, deepMerge } from './dom.js';
 import { t, setLocale, getLocale, onLocaleChange } from './i18n.js';
 import { state, setEntry, getMonitor } from './state.js';
 import { createUsageCard, updateUsageCard } from './monitor-card.js';
@@ -34,8 +34,6 @@ function setPinState(on) {
   btn.textContent = on ? '▲' : '△';
   btn.classList.toggle('active', on);
 }
-
-// ---- 横排 / 竖排切换 ----
 
 // 设置面板改动：本地已合并 state.config，这里应用 + 防抖持久化（合并累积的 patch）
 let pendingPatch = {};

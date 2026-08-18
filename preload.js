@@ -3,13 +3,8 @@ const { contextBridge, ipcRenderer } = require('electron');
 contextBridge.exposeInMainWorld('api', {
   // 窗口控制
   toggleAlwaysOnTop: () => ipcRenderer.invoke('toggle-always-on-top'),
-  getAlwaysOnTop: () => ipcRenderer.invoke('get-always-on-top'),
-  setOpacity: (opacity) => ipcRenderer.invoke('set-opacity', opacity),
-  getOpacity: () => ipcRenderer.invoke('get-opacity'),
   hideWindow: () => ipcRenderer.invoke('hide-window'),
   minimizeWindow: () => ipcRenderer.invoke('minimize-window'),
-  getWindowState: () => ipcRenderer.invoke('get-window-state'),
-  setLayoutSize: (payload) => ipcRenderer.invoke('window:set-layout-size', payload),
 
   // config
   getConfig: () => ipcRenderer.invoke('config:get'),

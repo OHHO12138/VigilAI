@@ -1,7 +1,7 @@
 const { app, globalShortcut, safeStorage } = require('electron');
 const path = require('path');
 const fs = require('fs');
-const { initConfig } = require('./src/main/config');
+const config = require('./src/main/config');
 const { createWindow, getMainWindow } = require('./src/main/window');
 const { setupIPC } = require('./src/main/ipc');
 const { registerShortcuts, unregisterShortcuts } = require('./src/main/shortcuts');
@@ -63,7 +63,7 @@ if (!gotSingleInstanceLock) {
     singleInstanceClose = acquired.close;
 
     app.whenReady().then(() => {
-      initConfig(app.getPath('userData'));
+      config.initConfig(app.getPath('userData'));
       history.initHistory(app.getPath('userData'));
 
       // 启动时同步开机自启状态到注册表
