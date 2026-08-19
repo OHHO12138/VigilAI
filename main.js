@@ -1,12 +1,18 @@
 const { app, globalShortcut, safeStorage } = require('electron');
 const path = require('path');
 const fs = require('fs');
+
+// Windows 任务栏图标/分组依赖 AppUserModelID：不设置时任务栏按钮会回退到 exe 的
+// 默认图标（开发模式即 Electron 图标），并可能与其它 Electron 应用错误分组。
+// 与 electron-builder 的 appId 保持一致。
+app.setAppUserModelId('com.vigilai.app');
 const config = require('./src/main/config');
 const { createWindow, getMainWindow } = require('./src/main/window');
 const { setupIPC } = require('./src/main/ipc');
 const { registerShortcuts, unregisterShortcuts } = require('./src/main/shortcuts');
 const { acquireSingleInstance } = require('./src/main/single-instance');
 const { createTray, destroyTray } = require('./src/main/tray');
+const autostart = require('./src/main/autostart');
 const monitor = require('./src/main/monitor');
 const adapters = require('./src/main/adapters');
 const history = require('./src/main/history');
@@ -66,10 +72,9 @@ if (!gotSingleInstanceLock) {
       config.initConfig(app.getPath('userData'));
       history.initHistory(app.getPath('userData'));
 
-      // 启动时同步开机自启状态到注册表
+      // 启动时同步开机自启状态到注册表（注册稳定路径 + 清理历史错误项）
       try {
-        const cfg = config.getConfig();
-        app.setLoginItemSettings({ openAtLogin: !!cfg.autoStart });
+        autostart.syncAutoStart(app, !!config.getConfig().autoStart);
       } catch (e) {
         console.error('Failed to sync login item:', e);
       }

@@ -2,6 +2,7 @@ const { app, ipcMain, dialog, shell } = require('electron');
 const config = require('./config');
 const monitor = require('./monitor');
 const adapters = require('./adapters');
+const autostart = require('./autostart');
 const { getMainWindow } = require('./window');
 
 function setupIPC() {
@@ -37,7 +38,8 @@ function setupIPC() {
   ipcMain.handle('auto-start:set', (_event, enabled) => {
     config.patchConfig({ autoStart: !!enabled });
     try {
-      app.setLoginItemSettings({ openAtLogin: !!enabled });
+      // 注册稳定路径并清理历史错误注册表项（便携版/开发模式的 setLoginItemSettings 默认行为不可靠）
+      autostart.setAutoStart(app, !!enabled);
     } catch (e) {
       console.error('Failed to set login item:', e);
     }

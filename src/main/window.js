@@ -44,13 +44,7 @@ function createWindow() {
   // 位置记忆：close/resize/move 持久化 bounds
   const saveBounds = () => {
     if (mainWindow && !mainWindow.isDestroyed()) {
-      const b = mainWindow.getBounds();
-      if (config.getConfig().layoutMode === 'horizontal') {
-        // 横向模式尺寸由内容决定，只记住位置；尺寸记忆仍用竖排时的 width/height
-        config.patchConfig({ x: b.x, y: b.y });
-      } else {
-        config.patchConfig(b);
-      }
+      config.patchConfig(mainWindow.getBounds());
     }
   };
   mainWindow.on('close', saveBounds);
