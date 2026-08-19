@@ -1,6 +1,6 @@
 {
   "name": "vigilai",
-  "version": "0.7.1",
+  "version": "0.7.11",
   "description": "VigilAI - 大模型订阅用量/余额桌面悬浮监控，多厂商多账号，用量圆盘+余额卡片",
   "main": "main.js",
   "author": "VigilAI",
