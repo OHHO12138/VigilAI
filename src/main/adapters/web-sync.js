@@ -24,7 +24,9 @@ const { normalizeCurrency } = require('./api-balance');
 const CHROME_UA =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36';
 const LOGIN_TIMEOUT_MS = 5 * 60 * 1000;
-const FETCH_TIMEOUT_MS = 30000;
+// 抓取超时 60s：PackyAPI 等站点走代理后首次加载可能长达 30s+（实测 17~32s），
+// 30s 的旧值会让慢代理下的加载在完成前被超时打断。
+const FETCH_TIMEOUT_MS = 60000;
 const POLL_MAX = 30;
 const POLL_INTERVAL_MS = 1000;
 const STABLE_POLLS = 3; // 连续N次提取结果一致才接受
@@ -150,7 +152,14 @@ function login(preset, ctx) {
     win.webContents.setUserAgent(CHROME_UA);
     win.webContents.session.setUserAgent(CHROME_UA);
     win.focus();
-    win.loadURL(preset.loginUrl);
+    // 登录窗口同样走系统代理：PackyAPI 等站点需要外网（VPN/代理）才能登录，
+    // 且 setProxy 是异步的，必须先等代理生效再发起首个请求，否则直连失败。
+    win.webContents.session
+      .setProxy({ mode: 'system' })
+      .catch(() => {})
+      .then(() => {
+        if (!win.isDestroyed()) win.loadURL(preset.loginUrl);
+      });
 
     let settled = false;
     const finish = (err, capture) => {
@@ -234,6 +243,22 @@ function login(preset, ctx) {
     win.webContents.on('did-navigate', onNavigate);
     win.webContents.on('did-navigate-in-page', onNavigate); // SPA 站内跳转
 
+    // 主框架加载失败（如代理不通/网络超时）时立即给出明确错误，而不是白屏挂到超时
+    win.webContents.on('did-fail-load', (_event, code, desc, validatedURL, isMainFrame) => {
+      if (!isMainFrame) return;
+      if (settled || win.isDestroyed()) return;
+      finish(new Error(`登录页加载失败 ${validatedURL}: ${code} ${desc}`));
+    });
+
+    // 加载过程给窗口标题加提示：走代理的站点（如 PackyAPI）首屏可能 20~30s 才出来，
+    // 避免用户看到长时间白屏误以为窗口卡死
+    win.webContents.on('did-start-loading', () => {
+      if (!win.isDestroyed()) win.setTitle(`${preset.loginTitle || '登录'} — 正在加载…`);
+    });
+    win.webContents.on('did-stop-loading', () => {
+      if (!win.isDestroyed() && !settled) win.setTitle(preset.loginTitle || '登录');
+    });
+
     win.on('closed', () => {
       if (!settled) {
         settled = true;
@@ -279,8 +304,14 @@ async function fetchPage(preset, monitor, ctx) {
       },
     });
     win.webContents.setUserAgent(CHROME_UA);
-    // 让隐藏窗口走系统代理（VPN/代理软件设置的端口），解决不开梯子取不到数据的问题
-    win.webContents.session.setProxy({ mode: 'system' }).catch(() => {});
+    // 让隐藏窗口走系统代理（VPN/代理软件设置的端口），解决不开梯子取不到数据的问题。
+    // setProxy 异步生效：必须等它完成再发起首个请求，否则页面可能在代理就绪前直连超时。
+    win.webContents.session
+      .setProxy({ mode: 'system' })
+      .catch(() => {})
+      .then(() => {
+        if (!win.isDestroyed()) win.loadURL(url);
+      });
 
     const finish = (err, data) => {
       if (settled) return;
@@ -349,8 +380,6 @@ async function fetchPage(preset, monitor, ctx) {
         finish(err);
       }
     });
-
-    win.loadURL(url);
   });
 }
 
