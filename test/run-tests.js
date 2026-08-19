@@ -668,6 +668,64 @@ async function main() {
     fs.rmSync(dir, { recursive: true, force: true });
   });
 
+  test('record 去重：相邻同值不重复记录，变化或超窗口后记录', () => {
+    const dir = tmpdir();
+    history.initHistory(dir);
+    history.record('dup', 50);
+    history.record('dup', 50);
+    history.record('dup', 50);
+    assert.strictEqual(history.getHistory('dup').length, 1); // 连续同值只记一条
+    history.record('dup', 60); // 值变化 → 记录
+    assert.strictEqual(history.getHistory('dup').length, 2);
+    fs.rmSync(dir, { recursive: true, force: true });
+  });
+
+  test('estimateBalanceAt 目标时刻余额插值 / 数据不足返回 null', () => {
+    const H = 3600 * 1000;
+    const arr = [
+      { ts: 1000, balance: 100 },
+      { ts: 5000, balance: 60 },
+      { ts: 10000, balance: 60 },
+    ];
+    // target=3000 介于 1000(100) 与 5000(60) 之间：ratio=0.5 → 80
+    assert.strictEqual(history.estimateBalanceAt(arr, 3000), 80);
+    // target 恰在快照上 → 该快照值
+    assert.strictEqual(history.estimateBalanceAt(arr, 5000), 60);
+    // target 在所有记录之后 / 之前 → 无观测 → null
+    assert.strictEqual(history.estimateBalanceAt(arr, 20000), null);
+    assert.strictEqual(history.estimateBalanceAt(arr, 0), null);
+    // 前后快照跨度超过 48h → 数据不足 → null
+    const sparse = [
+      { ts: 1000, balance: 100 },
+      { ts: 1000 + 100 * H, balance: 50 },
+    ];
+    assert.strictEqual(history.estimateBalanceAt(sparse, 1000 + 10 * H), null);
+    assert.strictEqual(history.estimateBalanceAt([], 1000), null);
+    assert.strictEqual(history.estimateBalanceAt(null, 1000), null);
+  });
+
+  test('startOfDay 返回本地时区当天 0 点', () => {
+    const s = new Date(history.startOfDay(Date.now()));
+    assert.strictEqual(s.getHours(), 0);
+    assert.strictEqual(s.getMinutes(), 0);
+    assert.strictEqual(s.getSeconds(), 0);
+    assert.strictEqual(s.getMilliseconds(), 0);
+  });
+
+  test('computeStats 记录全部在 24h 内时缺省日统计（数据不足）', () => {
+    const dir = tmpdir();
+    history.initHistory(dir);
+    history.record('stat', 100);
+    history.record('stat', 90);
+    history.record('stat', 80);
+    const stats = history.computeStats('stat');
+    // 所有快照都在"今天 0 点"之后，0 点时刻无观测 → 缺省，界面不显示
+    assert.strictEqual(stats.dayDelta, undefined);
+    // 已去掉周统计
+    assert.strictEqual(stats.weekDelta, undefined);
+    fs.rmSync(dir, { recursive: true, force: true });
+  });
+
   console.log(`\n${passed} passed, ${failed} failed`);
   process.exit(failed ? 1 : 0);
 }

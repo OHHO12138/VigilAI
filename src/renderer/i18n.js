@@ -117,7 +117,7 @@ const zh = {
   'toast.loginFailed': '登录失败',
   'toast.invalidForm': '请填写必填项',
 
-  'stats.day': '今日',
+  'stats.day': '今日用额',
   'stats.week': '本周',
 };
 
