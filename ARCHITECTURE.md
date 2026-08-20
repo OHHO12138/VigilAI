@@ -8,7 +8,7 @@
 main.js                  入口：app.whenReady → createWindow → setupIPC → registerShortcuts
 preload.js               contextBridge 暴露 api
 src/main/
-  window.js              透明无边框窗口、位置记忆、置顶、全局紧凑模式
+  window.js              透明无边框窗口、位置记忆、置顶
   config.js              config.json（外观/窗口/语言）+ monitors.json（监控项 CRUD）读写
   monitor.js             监控调度：按每个 monitor 的刷新规则定时取数，30s 缓存，推送渲染层
   ipc.js                 全部 ipcMain.handle
@@ -144,7 +144,7 @@ opencode-go 以 preset 配置接入 web-sync 引擎：
 - balance 卡：name + 余额（币种符号）+ 刷新时间 + 手动刷新按钮。
 - 统一字体：所有文字用 appearance.fontColor / fontSize。
 - 设置面板：modal 全屏覆盖。监控项列表 CRUD（表单含 kind/provider/name/apiKey/baseUrl/refresh/currency + opencode-go 的"官网同步登录"按钮）；外观区（边框粗细/透明度/背景色/圆盘底色/已用色/字体色/字号）；预警区（模式、两个阈值、三色/三图）；语言切换。
-- 窗口特性沿用原方案：CSS opacity 调透明度（不能用 setOpacity）、`-webkit-app-region: drag` 拖拽、close/resize/move 持久化 bounds、backdrop-filter 毛玻璃。
+- 窗口特性沿用原方案：CSS opacity 调透明度（不能用 setOpacity）、`-webkit-app-region: drag` 拖拽、close/resize/move 持久化 bounds、backdrop-filter 半透明玻璃（透明窗口下只模糊窗口内层，液态玻璃皮肤自绘彩色光斑营造玻璃质感）。
 
 ## i18n
 
