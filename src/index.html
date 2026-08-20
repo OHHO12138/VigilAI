@@ -10,6 +10,15 @@
 <body>
 
 <div id="app" class="app-body">
+  <!-- 液态玻璃背景光斑层（仅 glass 皮肤显示）：自绘彩色光斑被下方 .app-content 的
+       backdrop-filter 模糊，模拟"玻璃背后的彩色液体"——透明窗口无法模糊桌面，故自造背景 -->
+  <div class="glass-bg" aria-hidden="true">
+    <div class="glass-blob b1"></div>
+    <div class="glass-blob b2"></div>
+    <div class="glass-blob b3"></div>
+    <div class="glass-blob b4"></div>
+  </div>
+
   <div class="app-content">
 
     <div id="title-bar" class="title-bar drag-region">

@@ -16,6 +16,10 @@ const cardEls = new Map(); // monitor id → card element
 function applyConfig(cfg) {
   if (!cfg) return;
   const root = document.documentElement.style;
+  // 皮肤标记：CSS 用 body[data-theme='glass'] 应用玻璃装饰（光斑/高光/圆角/卡片质感）
+  document.body.dataset.theme = cfg.theme || 'dark';
+  // 液态玻璃：指针移动更新镜面高光位置（--mx/--my 供 .glass-bg::after 使用）
+  if (cfg.theme === 'glass') wireGlassSpecular();
   const a = cfg.appearance || {};
   if (a.borderWidth != null) root.setProperty('--app-border-width', `${a.borderWidth}px`);
   if (a.bgColor) root.setProperty('--app-bg', a.bgColor);
@@ -33,6 +37,24 @@ function setPinState(on) {
   const btn = $('#btn-pin');
   btn.textContent = on ? '▲' : '△';
   btn.classList.toggle('active', on);
+}
+
+// 液态玻璃镜面高光：在面板上移动鼠标时更新 --mx/--my。
+// 变量必须设在 .glass-bg 上（消费方 .glass-bg::after 的兄弟节点读不到 .app-content 上的变量）。
+let glassWired = false;
+function wireGlassSpecular() {
+  if (glassWired) return;
+  // 系统开启"减少动态效果"时跳过，避免无谓的逐帧样式写入
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  glassWired = true;
+  const target = document.querySelector('.glass-bg');
+  if (!target) return;
+  target.addEventListener('pointermove', (e) => {
+    const r = target.getBoundingClientRect();
+    if (!r.width || !r.height) return;
+    target.style.setProperty('--mx', `${((e.clientX - r.left) / r.width) * 100}%`);
+    target.style.setProperty('--my', `${((e.clientY - r.top) / r.height) * 100}%`);
+  });
 }
 
 // 设置面板改动：本地已合并 state.config，这里应用 + 防抖持久化（合并累积的 patch）

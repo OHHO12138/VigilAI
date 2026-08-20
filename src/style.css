@@ -854,3 +854,191 @@ input[type='color'] {
 .toast.error {
   border-color: var(--danger);
 }
+
+/* ---- 液态玻璃皮肤（theme: glass）----
+   参考典型 liquid-glass 实现：玻璃面板后有自绘彩色光斑（.glass-bg 的 blob），
+   被面板 backdrop-filter 模糊成柔和彩色，形成"玻璃背后的彩色液体"；
+   加上渐变描边（上亮下暗）、跟随指针的镜面高光、细噪点、大圆角。
+   透明窗口无法模糊桌面，故光斑层自绘在窗口内。色板由 config.appearance 注入。 */
+
+body[data-theme='glass'] {
+  --bg-secondary: rgba(255, 255, 255, 0.06);
+  --bg-hover: rgba(255, 255, 255, 0.10);
+  --bg-active: rgba(255, 255, 255, 0.16);
+  --text-secondary: rgba(226, 232, 255, 0.90);
+  --text-muted: rgba(203, 213, 240, 0.72);
+  --border: rgba(255, 255, 255, 0.14);
+  --border-active: rgba(255, 255, 255, 0.34);
+  --brand-soft: rgba(139, 92, 246, 0.28);
+  --danger-bg: rgba(239, 68, 68, 0.22);
+}
+
+/* 玻璃窗口外壳：大圆角（内角 18px 与外角同心），去掉实体边框由渐变描边代替 */
+body[data-theme='glass'] .app-body {
+  border-radius: calc(18px + var(--app-border-width));
+  clip-path: inset(0 round calc(18px + var(--app-border-width)));
+}
+
+/* ---- 彩色光斑层（玻璃背后的"液体"）---- */
+/* 默认隐藏，仅 glass 皮肤显示 */
+.glass-bg {
+  display: none;
+}
+
+body[data-theme='glass'] .glass-bg {
+  display: block;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  border-radius: 18px;
+  pointer-events: none;
+  background: radial-gradient(120% 90% at 12% 0%, rgba(56, 62, 120, 0.55), transparent 60%);
+}
+
+body[data-theme='glass'] .glass-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(42px);
+  opacity: 0.62;
+  will-change: transform;
+}
+
+body[data-theme='glass'] .glass-blob.b1 {
+  width: 78%;
+  height: 78%;
+  top: -22%;
+  left: -18%;
+  background: #8b5cf6;
+  animation: glass-drift1 46s ease-in-out infinite;
+}
+
+body[data-theme='glass'] .glass-blob.b2 {
+  width: 66%;
+  height: 66%;
+  top: 4%;
+  right: -24%;
+  background: #22d3ee;
+  animation: glass-drift2 52s ease-in-out infinite;
+}
+
+body[data-theme='glass'] .glass-blob.b3 {
+  width: 58%;
+  height: 58%;
+  bottom: -18%;
+  left: 14%;
+  background: #f472b6;
+  animation: glass-drift3 49s ease-in-out infinite;
+}
+
+body[data-theme='glass'] .glass-blob.b4 {
+  width: 46%;
+  height: 46%;
+  bottom: 4%;
+  right: -10%;
+  background: #60a5fa;
+  animation: glass-drift2 56s ease-in-out infinite reverse;
+}
+
+@keyframes glass-drift1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(6%, 5%) scale(1.12); }
+  66% { transform: translate(-4%, 8%) scale(0.94); }
+}
+
+@keyframes glass-drift2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  40% { transform: translate(-7%, 6%) scale(0.92); }
+  70% { transform: translate(4%, -5%) scale(1.15); }
+}
+
+@keyframes glass-drift3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(6%, -7%) scale(1.18); }
+}
+
+/* 细颗粒噪点：增加玻璃颗粒质感 */
+body[data-theme='glass'] .glass-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  opacity: 0.05;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/><feColorMatrix type='saturate' values='0'/></filter><rect width='160' height='160' filter='url(%23n)'/></svg>");
+}
+
+/* 镜面高光：跟随指针的柔光（--mx/--my 由 app.js 更新），强化"液态"反光感 */
+body[data-theme='glass'] .glass-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: radial-gradient(280px circle at var(--mx, 50%) var(--my, -20%), rgba(255, 255, 255, 0.16), transparent 62%);
+}
+
+/* 玻璃面板：盖在光斑层上并模糊它；渐变描边用四边亮度不同的内阴影模拟（上亮下暗） */
+body[data-theme='glass'] .app-content {
+  position: relative;
+  z-index: 1;
+  border-radius: 18px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.30),
+    inset 1px 0 0 rgba(255, 255, 255, 0.12),
+    inset -1px 0 0 rgba(255, 255, 255, 0.05),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.03),
+    inset 0 0 42px rgba(120, 140, 255, 0.09);
+  backdrop-filter: blur(26px) saturate(1.7);
+  -webkit-backdrop-filter: blur(26px) saturate(1.7);
+}
+
+/* 玻璃卡片：斜向微渐变 + 顶部内高光 + 悬浮投影 */
+body[data-theme='glass'] .card {
+  background: linear-gradient(165deg, rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0.05) 55%, rgba(255, 255, 255, 0.09));
+  border-color: rgba(255, 255, 255, 0.17);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.20),
+    0 4px 16px rgba(2, 6, 26, 0.35);
+}
+
+body[data-theme='glass'] .title-bar {
+  border-bottom-color: rgba(255, 255, 255, 0.12);
+}
+
+/* 设置面板：比主面板更实的玻璃，保证列表可读性；光斑仍透出微光 */
+body[data-theme='glass'] .settings-overlay {
+  background: rgba(10, 14, 30, 0.38);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+body[data-theme='glass'] .settings-panel {
+  background: rgba(16, 20, 38, 0.72);
+  border-color: rgba(255, 255, 255, 0.22);
+  border-radius: 14px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+
+body[data-theme='glass'] .form-input {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+body[data-theme='glass'] select.form-input option {
+  background: #23263a;
+}
+
+body[data-theme='glass'] .toast {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.28);
+}
+
+/* 用户开启系统"减少动态效果"时关闭光斑漂移动画 */
+@media (prefers-reduced-motion: reduce) {
+  body[data-theme='glass'] .glass-blob {
+    animation: none;
+  }
+}
+
+

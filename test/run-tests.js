@@ -48,6 +48,7 @@ async function main() {
     assert.strictEqual(cfg.height, 580);
     assert.strictEqual(cfg.layoutMode, 'vertical');
     assert.strictEqual(cfg.locale, 'zh');
+    assert.strictEqual(cfg.theme, 'dark');
     assert.strictEqual(cfg.appearance.borderWidth, 8);
     assert.strictEqual(cfg.alert.threshold2, 85);
     assert.strictEqual(cfg.alert.colors.safe, '#7ed6a5');
@@ -533,6 +534,34 @@ async function main() {
     assert.strictEqual(i18n.t('monitor.intervalMinutes', { n: 5 }), 'Every 5 min');
     assert.strictEqual(i18n.t('nonexistent.key'), 'nonexistent.key');
     i18n.setLocale('zh');
+  });
+
+  test('皮肤预设：三套键完整且 dark 与默认配置一致（切换皮肤无外观漂移）', async () => {
+    const settings = await import('../src/renderer/settings.js');
+    const config = require('../src/main/config');
+    const dir = tmpdir();
+    config.initConfig(dir); // 用干净默认配置做基准，避免前面用例污染
+    const presets = settings.THEME_PRESETS;
+    // 三套皮肤都存在，且每套都带 opacity + appearance 完整色板
+    for (const id of ['dark', 'light', 'glass']) {
+      assert.ok(presets[id], `缺少皮肤预设: ${id}`);
+      assert.strictEqual(typeof presets[id].opacity, 'number', `${id}.opacity`);
+      const appr = presets[id].appearance;
+      for (const k of Object.keys(config.getConfig().appearance)) {
+        assert.ok(k in appr, `${id}.appearance 缺少键: ${k}`);
+      }
+    }
+    // dark 预设与 DEFAULT_CONFIG.appearance/opacity 逐项一致（切回 dark 恢复原样）
+    const d = presets.dark;
+    const def = config.getConfig();
+    assert.strictEqual(d.opacity, def.opacity);
+    for (const k of Object.keys(def.appearance)) {
+      assert.strictEqual(d.appearance[k], def.appearance[k], `dark.appearance.${k}`);
+    }
+    // glass 是液态玻璃：无实体边框 + 半透明深色背景
+    assert.strictEqual(presets.glass.appearance.borderWidth, 0);
+    assert.match(presets.glass.appearance.bgColor, /^rgba\(14, 18, 36, 0\.40\)$/);
+    fs.rmSync(dir, { recursive: true, force: true });
   });
 
   console.log('渲染层预警逻辑（state.js）:');

@@ -445,6 +445,55 @@ function buildMonitorsSection() {
 
 // ---------- 外观 ----------
 
+// 皮肤预设：切换皮肤 = 写入 theme + 套用该外观色板（appearance/opacity）。
+// dark=项目默认深炭黑；light=明亮浅色（原自定义外观）；glass=液态玻璃（半透明+高光）。
+// 导出供测试断言键完整性，并供渲染层按需引用。
+export const THEME_PRESETS = {
+  dark: {
+    opacity: 0.92,
+    appearance: {
+      borderWidth: 8,
+      bgColor: 'rgba(24, 24, 27, 0.88)',
+      cardBgColor: 'rgba(39, 39, 42, 0.86)',
+      ringTrackColor: 'rgba(255, 255, 255, 0.10)',
+      ringUsedColor: 'rgba(250, 250, 250, 0.95)',
+      fontColor: '#FAFAFA',
+      fontSize: 11,
+    },
+  },
+  light: {
+    opacity: 1,
+    appearance: {
+      borderWidth: 0,
+      bgColor: 'rgba(242, 246, 250, 1)',
+      cardBgColor: 'rgba(203, 214, 235, 0.7)',
+      ringTrackColor: 'rgba(242, 240, 255, 0.1)',
+      ringUsedColor: 'rgba(218, 226, 236, 0.95)',
+      fontColor: 'rgba(13, 12, 13, 1)',
+      fontSize: 11,
+    },
+  },
+  glass: {
+    opacity: 1,
+    appearance: {
+      borderWidth: 0, // 液态玻璃用渐变描边（CSS 内阴影），不再画实体边框
+      bgColor: 'rgba(14, 18, 36, 0.40)',
+      cardBgColor: 'rgba(255, 255, 255, 0.10)',
+      ringTrackColor: 'rgba(255, 255, 255, 0.14)',
+      ringUsedColor: 'rgba(255, 255, 255, 0.95)',
+      fontColor: '#FFFFFF',
+      fontSize: 11,
+    },
+  },
+};
+
+function applyTheme(id) {
+  const preset = THEME_PRESETS[id];
+  if (!preset) return;
+  applyPreview({ theme: id, appearance: { ...preset.appearance }, opacity: preset.opacity });
+  renderSettings(); // 刷新下方颜色控件显示为当前皮肤色板
+}
+
 function sliderRow(labelText, min, max, value, onInput) {
   const valueEl = el('span', { class: 'slider-value' }, String(value));
   return el('div', { class: 'form-field' }, [
@@ -483,8 +532,17 @@ function colorRow(labelText, rgbaValue, onChange) {
 
 function buildAppearanceSection() {
   const a = state.config.appearance;
+  const currentTheme = state.config.theme || 'dark';
   return el('section', { class: 'settings-section' }, [
     el('h4', {}, t('settings.appearance')),
+    el('div', { class: 'form-field' }, [
+      el('span', { class: 'form-label' }, t('settings.theme')),
+      el('div', { class: 'radio-row' }, [
+        ...['dark', 'light', 'glass'].map((id) =>
+          radioOption('theme', id, currentTheme === id, t(`theme.${id}`), () => applyTheme(id))
+        ),
+      ]),
+    ]),
     sliderRow(t('appearance.borderWidth'), 0, 16, a.borderWidth, (v) => applyPreview({ appearance: { borderWidth: v } })),
     sliderRow(t('appearance.opacity'), 30, 100, Math.round(state.config.opacity * 100), (v) => applyPreview({ opacity: v / 100 })),
     colorRow(t('appearance.bgColor'), a.bgColor, (c) => applyPreview({ appearance: { bgColor: c } })),

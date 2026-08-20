@@ -13,6 +13,7 @@ const DEFAULT_CONFIG = {
   height: 580,
   layoutMode: 'vertical',
   locale: 'zh',
+  theme: 'dark', // 皮肤：dark（深炭黑）| light（明亮）| glass（液态玻璃）
   appearance: {
     borderWidth: 8,
     bgColor: 'rgba(24, 24, 27, 0.88)',

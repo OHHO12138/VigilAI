@@ -29,6 +29,7 @@ const zh = {
   'settings.title': '设置',
   'settings.monitors': '监控项',
   'settings.appearance': '外观',
+  'settings.theme': '皮肤',
   'settings.alert': '预警',
   'settings.language': '语言',
   'settings.autoStart': '开机自启',
@@ -78,6 +79,10 @@ const zh = {
   'appearance.fontColor': '字体颜色',
   'appearance.fontSize': '字体大小',
 
+  'theme.dark': '深炭黑',
+  'theme.light': '明亮',
+  'theme.glass': '液态玻璃',
+
   'alert.mode': '预警模式',
   'alert.modeDot': '色球',
   'alert.modeImage': '图案',
@@ -112,13 +117,11 @@ const zh = {
   'toast.enabled': '已启用',
   'toast.disabled': '已停用',
   'toast.deleted': '已删除',
-  'toast.refreshFailed': '刷新失败',
   'toast.loginSuccess': '登录成功',
   'toast.loginFailed': '登录失败',
   'toast.invalidForm': '请填写必填项',
 
   'stats.day': '今日用额',
-  'stats.week': '本周',
 };
 
 const en = {
@@ -149,6 +152,7 @@ const en = {
   'settings.title': 'Settings',
   'settings.monitors': 'Monitors',
   'settings.appearance': 'Appearance',
+  'settings.theme': 'Theme',
   'settings.alert': 'Alert',
   'settings.language': 'Language',
   'settings.autoStart': 'Start on boot',
@@ -198,6 +202,10 @@ const en = {
   'appearance.fontColor': 'Font color',
   'appearance.fontSize': 'Font size',
 
+  'theme.dark': 'Charcoal',
+  'theme.light': 'Light',
+  'theme.glass': 'Liquid Glass',
+
   'alert.mode': 'Alert mode',
   'alert.modeDot': 'Dot',
   'alert.modeImage': 'Image',
@@ -232,13 +240,11 @@ const en = {
   'toast.enabled': 'Enabled',
   'toast.disabled': 'Disabled',
   'toast.deleted': 'Deleted',
-  'toast.refreshFailed': 'Refresh failed',
   'toast.loginSuccess': 'Login success',
   'toast.loginFailed': 'Login failed',
   'toast.invalidForm': 'Please fill required fields',
 
   'stats.day': 'Today',
-  'stats.week': 'Week',
 };
 
 const dicts = { zh, en };
