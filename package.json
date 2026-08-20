@@ -1,6 +1,6 @@
 {
   "name": "vigilai",
-  "version": "0.7.11",
+  "version": "1.0.0",
   "description": "VigilAI - 大模型订阅用量/余额桌面悬浮监控，多厂商多账号，用量圆盘+余额卡片",
   "main": "main.js",
   "author": "VigilAI",
@@ -54,7 +54,7 @@
       "shortcutName": "VigilAI"
     },
     "portable": {
-      "artifactName": "VigilAI-v${version}.exe"
+      "artifactName": "VigilAI-v1.0.exe"
     }
   }
 }

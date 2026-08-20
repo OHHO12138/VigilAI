@@ -22,7 +22,7 @@
 
 ## 下载使用（普通用户）
 
-- 到本仓库 **Releases** 页面下载最新版便携版 exe（如 `VigilAI-v0.7.11.exe`），双击即可运行，无需安装 Node.js。
+- 到本仓库 **Releases** 页面下载最新版便携版 exe（如 `VigilAI-v1.0.exe`），双击即可运行，无需安装 Node.js。
 - 配置（监控项、外观、预警、语言等）都在应用内 ⚙ 设置面板完成；数据保存在 `%APPDATA%\VigilAI\`（`config.json` / `monitors.json`）。
 - 需要修改或排查厂商配置时，可以让 agent 参考 [skill/SKILL.md](skill/SKILL.md)。
 
