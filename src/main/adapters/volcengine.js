@@ -4,7 +4,7 @@
 // 签名规则见 https://www.volcengine.com/docs/6369/67269 ，实现已用该文档的官方测试向量验证。
 // 凭证字段：monitor.auth.accessKey / monitor.auth.secretKey
 const crypto = require('crypto');
-const { requestJson, toNumber } = require('./api-balance');
+const { requestConfiguredJson, toNumber } = require('./api-balance');
 
 const HOST = 'open.volcengineapi.com';
 const SERVICE = 'billing';
@@ -131,7 +131,7 @@ async function fetchBalance(monitor) {
     sk: auth.secretKey,
   });
   const url = `${u.origin}${u.pathname || '/'}?${canonicalQuery(query)}`;
-  const json = await requestJson(url, { headers: signed.headers });
+  const json = await requestConfiguredJson(url, { headers: signed.headers });
   return parseVolcBalance(json);
 }
 

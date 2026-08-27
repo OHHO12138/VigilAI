@@ -1,7 +1,7 @@
 // 通用 API 订阅用量查询，结构与 api-balance 一致。
 // 各周期百分比用 JSON 路径映射：monitor.auth.paths = { fiveHours, week, month }，缺省的周期不返回。
 // minimax 已改为官网同步适配器（见 minimax.js），本文件只服务 custom-usage。
-const { pickByPath, toNumber, requestJson } = require('./api-balance');
+const { pickByPath, toNumber, requestConfiguredJson } = require('./api-balance');
 
 const PRESETS = {
   'custom-usage': { url: '' },
@@ -35,7 +35,11 @@ async function fetchUsage(monitor) {
   if (auth.apiKey && !Object.keys(headers).some((k) => k.toLowerCase() === 'authorization')) {
     headers.Authorization = `Bearer ${auth.apiKey}`;
   }
-  const json = await requestJson(url, { method: (auth.method || 'GET').toUpperCase(), headers });
+  const json = await requestConfiguredJson(url, {
+    method: (auth.method || 'GET').toUpperCase(),
+    headers,
+    allowPrivateHost: auth.allowPrivateHost === true,
+  });
   return parseUsageByPaths(json, auth.paths);
 }
 

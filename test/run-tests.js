@@ -156,6 +156,54 @@ async function main() {
     assert.throws(() => balance.parseKimi({ code: 401, message: 'bad key' }), /bad key/);
   });
 
+  test('parseZhipu 取 data.balance / 回落 availableBalance', () => {
+    const resp = {
+      code: 200,
+      msg: '操作成功',
+      success: true,
+      data: { balance: '19.920954440', availableBalance: 19.92, rechargeAmount: 20.0 },
+    };
+    assert.deepStrictEqual(balance.parseZhipu(resp, 'RMB'), { balance: 19.92095444, currency: 'CNY' });
+    assert.deepStrictEqual(
+      balance.parseZhipu({ code: 200, success: true, data: { availableBalance: 3.5 } }, 'CNY'),
+      { balance: 3.5, currency: 'CNY' }
+    );
+    assert.throws(() => balance.parseZhipu({ code: 401, msg: 'unauthorized', success: false }, 'CNY'), /unauthorized/);
+    assert.throws(() => balance.parseZhipu({ code: 200, success: true, data: null }, 'CNY'), /智谱/);
+  });
+
+  test('parseSiliconflow 取 totalBalance / 回落 balance', () => {
+    const resp = {
+      status: true,
+      message: 'OK',
+      data: { balance: '1.00', chargeBalance: '110.00', totalBalance: '111.00' },
+    };
+    assert.deepStrictEqual(balance.parseSiliconflow(resp, 'RMB'), { balance: 111, currency: 'CNY' });
+    assert.deepStrictEqual(
+      balance.parseSiliconflow({ status: true, data: { balance: '7.5' } }, 'CNY'),
+      { balance: 7.5, currency: 'CNY' }
+    );
+    assert.throws(() => balance.parseSiliconflow({ code: 30014, message: 'Token is invalid.' }, 'CNY'), /Token is invalid/);
+    assert.throws(() => balance.parseSiliconflow({ status: true, data: null }, 'CNY'), /SiliconFlow/);
+  });
+
+  test('assertUrlAllowed 拦截内网地址与非 http(s) 协议', () => {
+    balance.assertUrlAllowed('https://api.deepseek.com/user/balance', false);
+    balance.assertUrlAllowed('http://api.hanhegufei.online/v1/usage', false); // 公网 http 允许
+    assert.throws(() => balance.assertUrlAllowed('http://127.0.0.1:3000/api', false), /内网/);
+    assert.throws(() => balance.assertUrlAllowed('http://192.168.1.5/api', false), /内网/);
+    assert.throws(() => balance.assertUrlAllowed('http://10.0.0.2/v1', false), /内网/);
+    assert.throws(() => balance.assertUrlAllowed('http://172.16.0.9/v1', false), /内网/);
+    assert.throws(() => balance.assertUrlAllowed('http://localhost:3000', false), /内网/);
+    assert.throws(() => balance.assertUrlAllowed('http://[::1]:8080', false), /内网/);
+    assert.throws(() => balance.assertUrlAllowed('http://169.254.1.1', false), /内网/);
+    assert.throws(() => balance.assertUrlAllowed('file:///etc/passwd', false), /协议/);
+    assert.throws(() => balance.assertUrlAllowed('not a url', false), /无效/);
+    balance.assertUrlAllowed('http://192.168.1.5/api', true); // 局域网自建服务显式放行
+    assert.strictEqual(balance.isPrivateHost('8.8.8.8'), false);
+    assert.strictEqual(balance.isPrivateHost('open.bigmodel.cn'), false);
+  });
+
   test('parseByPath', () => {
     const resp = { data: { available_balance: '33.3' } };
     assert.deepStrictEqual(balance.parseByPath(resp, 'data.available_balance', 'USD'), {
@@ -182,13 +230,26 @@ async function main() {
     assert.strictEqual(opencodeGo.parseUsageValues(null), null);
   });
 
+  test('opencode-zen parseBalanceText', () => {
+    const zen = require('../src/main/adapters/opencode-zen');
+    assert.strictEqual(zen.parseBalanceText('$15.00'), 15);
+    assert.strictEqual(zen.parseBalanceText('$1,234.56'), 1234.56);
+    assert.strictEqual(zen.parseBalanceText('$0.00'), 0);
+    assert.strictEqual(zen.parseBalanceText('15.00'), null); // 无 $ 前缀不接受，避免误抓百分比/其他数字
+    assert.strictEqual(zen.parseBalanceText(''), null);
+    assert.strictEqual(zen.parseBalanceText(null), null);
+  });
+
   test('注册表 provider 完整 + supportedKinds', () => {
-    for (const p of ['opencode-go', 'deepseek', 'kimi', 'volcengine', 'minimax', 'mimo', 'packyapi', 'qwen', 'custom-usage', 'custom-balance']) {
+    for (const p of ['opencode-go', 'opencode-zen', 'deepseek', 'kimi', 'zhipu', 'siliconflow', 'volcengine', 'minimax', 'mimo', 'packyapi', 'qwen', 'custom-usage', 'custom-balance']) {
       assert.ok(adapters.getAdapter(p), p);
     }
     assert.deepStrictEqual(adapters.getAdapter('opencode-go').supportedKinds, ['usage']);
+    assert.deepStrictEqual(adapters.getAdapter('opencode-zen').supportedKinds, ['balance']);
     assert.deepStrictEqual(adapters.getAdapter('deepseek').supportedKinds, ['balance']);
     assert.deepStrictEqual(adapters.getAdapter('kimi').supportedKinds, ['balance']);
+    assert.deepStrictEqual(adapters.getAdapter('zhipu').supportedKinds, ['balance']);
+    assert.deepStrictEqual(adapters.getAdapter('siliconflow').supportedKinds, ['balance']);
     assert.deepStrictEqual(adapters.getAdapter('minimax').supportedKinds, ['usage', 'balance']);
     assert.deepStrictEqual(adapters.getAdapter('volcengine').supportedKinds, ['balance']);
     assert.deepStrictEqual(adapters.getAdapter('mimo').supportedKinds, ['balance']);
@@ -498,7 +559,7 @@ async function main() {
   console.log('provider 元信息:');
   test('listProviderMeta 与适配器 supportedKinds 一致', () => {
     const metas = adapters.listProviderMeta();
-    assert.strictEqual(metas.length, 10);
+    assert.strictEqual(metas.length, 13);
     for (const m of metas) {
       assert.deepStrictEqual(m.supportedKinds, adapters.getAdapter(m.id).supportedKinds, m.id);
       assert.strictEqual(typeof m.needsApiKey, 'boolean', m.id);
@@ -506,6 +567,7 @@ async function main() {
     }
     const byId = Object.fromEntries(metas.map((m) => [m.id, m]));
     assert.strictEqual(byId['opencode-go'].isWebSync, true);
+    assert.strictEqual(byId['opencode-zen'].isWebSync, true);
     assert.strictEqual(byId['minimax'].isWebSync, false);
     assert.strictEqual(byId['minimax'].needsApiKey, true);
     assert.strictEqual(byId['minimax'].defaultBaseUrl, 'https://www.minimaxi.com');
@@ -513,6 +575,12 @@ async function main() {
     assert.strictEqual(byId['deepseek'].needsApiKey, true);
     assert.strictEqual(byId['deepseek'].defaultBaseUrl, 'https://api.deepseek.com');
     assert.strictEqual(byId['custom-usage'].needsBaseUrl, true);
+    assert.strictEqual(byId['zhipu'].needsApiKey, true);
+    assert.strictEqual(byId['zhipu'].needsBaseUrl, false); // 预设内置查询 URL，无需用户填
+    assert.strictEqual(byId['siliconflow'].needsApiKey, true);
+    assert.strictEqual(byId['siliconflow'].needsBaseUrl, false);
+    assert.strictEqual(byId['custom-balance'].needsBalancePath, true);
+    assert.strictEqual(byId['zhipu'].needsBalancePath, false);
   });
 
   console.log('i18n:');

@@ -31,6 +31,7 @@ function emptyDraft() {
     siteUrl: '',
     accessKey: '',
     secretKey: '',
+    balancePath: '',
     currency: 'RMB',
     targetUrl: '',
     extractJs: '',
@@ -52,6 +53,7 @@ function draftFromMonitor(m) {
     siteUrl: (m.auth && m.auth.siteUrl) || '',
     accessKey: (m.auth && m.auth.accessKey) || '',
     secretKey: (m.auth && m.auth.secretKey) || '',
+    balancePath: (m.auth && m.auth.balancePath) || '',
     currency: m.currency === 'USD' ? 'USD' : 'RMB',
     targetUrl: (m.auth && m.auth.targetUrl) || '',
     extractJs: (m.auth && m.auth.extractJs) || '',
@@ -189,6 +191,10 @@ function buildMonitorForm() {
     const label = meta.needsBaseUrl ? t('monitor.baseUrl') : t('monitor.baseUrlOptional');
     form.appendChild(field(label, textInput('baseUrl', draft.baseUrl, meta.defaultBaseUrl || 'https://…')));
   }
+  if (meta.needsBalancePath) {
+    // 占位符给一个可对照的响应示例，用户照着"哪层是数字就点到哪层"填即可
+    form.appendChild(field(t('monitor.balancePath'), textInput('balancePath', draft.balancePath, 'data.balance')));
+  }
   form.appendChild(
     field(
       t('monitor.siteUrl'),
@@ -253,6 +259,7 @@ async function saveMonitor() {
   if (meta.needsApiKey && !draft.apiKey.trim()) return showToast(t('toast.invalidForm'), 'error');
   if (meta.needsAkSk && (!draft.accessKey.trim() || !draft.secretKey.trim())) return showToast(t('toast.invalidForm'), 'error');
   if (meta.needsBaseUrl && !draft.baseUrl.trim()) return showToast(t('toast.invalidForm'), 'error');
+  if (meta.needsBalancePath && !draft.balancePath.trim()) return showToast(t('toast.invalidForm'), 'error');
 
   const auth = {};
   if (meta.needsApiKey) auth.apiKey = draft.apiKey.trim();
@@ -261,6 +268,7 @@ async function saveMonitor() {
     auth.secretKey = draft.secretKey.trim();
   }
   if (showBaseUrlField(meta)) auth.baseUrl = draft.baseUrl.trim();
+  if (meta.needsBalancePath) auth.balancePath = draft.balancePath.trim();
   auth.siteUrl = draft.siteUrl.trim(); // 空值回落厂商预设 siteUrl（getSiteUrl 处理）
   if (meta.isWebSync) {
     auth.targetUrl = draft.targetUrl.trim();

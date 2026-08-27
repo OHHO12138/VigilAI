@@ -7,7 +7,7 @@ const crypto = require('crypto');
 // 这里用“userData 目录哈希”作为管道名，同一用户数据目录只允许一个实例成为主实例；
 // 后启动的实例连接管道成功后发送 FOCUS，然后退出。
 function pipePathFor(userData) {
-  const hash = crypto.createHash('sha1').update(userData).digest('hex').slice(0, 16);
+  const hash = crypto.createHash('sha256').update(userData).digest('hex').slice(0, 16);
   return '\\\\.\\pipe\\vigilai-' + hash;
 }
 

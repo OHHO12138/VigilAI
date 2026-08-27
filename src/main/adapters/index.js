@@ -4,6 +4,7 @@
 // supportedKinds 声明支持的类型，monitor.provider + monitor.kind 决定走哪条路。
 // ctx: { app, safeStorage }（官网同步类适配器用于 session/凭证）
 const opencodeGo = require('./opencode-go');
+const opencodeZen = require('./opencode-zen');
 const minimax = require('./minimax');
 const volcengine = require('./volcengine');
 const mimo = require('./mimo');
@@ -14,8 +15,11 @@ const apiUsage = require('./api-usage');
 
 const adapters = {
   'opencode-go': opencodeGo, // 官网同步，usage
+  'opencode-zen': opencodeZen, // 官网同步，balance（workspace 账单页 credits）
   deepseek: apiBalance, // API，balance
   kimi: apiBalance, // API，balance
+  zhipu: apiBalance, // API，balance（控制台同款接口，非公开 API）
+  siliconflow: apiBalance, // API，balance
   volcengine, // 签名 OpenAPI，balance
   minimax, // API，usage + balance
   mimo, // 官网同步（启发式），balance
@@ -33,15 +37,18 @@ function getAdapter(provider) {
 // siteUrl：卡片"打开官网"按钮的默认地址；custom 系列为空，由用户在表单里填写。
 const PROVIDER_META = [
   { id: 'opencode-go', isWebSync: true, siteUrl: 'https://opencode.ai' },
+  { id: 'opencode-zen', isWebSync: true, siteUrl: 'https://opencode.ai/zen' },
   { id: 'deepseek', needsApiKey: true, defaultBaseUrl: 'https://api.deepseek.com', siteUrl: 'https://platform.deepseek.com' },
   { id: 'kimi', needsApiKey: true, defaultBaseUrl: 'https://api.moonshot.cn', siteUrl: 'https://platform.moonshot.cn' },
+  { id: 'zhipu', needsApiKey: true, siteUrl: 'https://open.bigmodel.cn/finance-center/finance/overview' },
+  { id: 'siliconflow', needsApiKey: true, siteUrl: 'https://cloud.siliconflow.cn' },
   { id: 'minimax', needsApiKey: true, defaultBaseUrl: 'https://www.minimaxi.com', siteUrl: 'https://platform.minimaxi.com' },
   { id: 'volcengine', needsAkSk: true, siteUrl: 'https://console.volcengine.com/ark' },
   { id: 'mimo', isWebSync: true, siteUrl: 'https://platform.xiaomimimo.com/' },
   { id: 'packyapi', isWebSync: true, siteUrl: 'https://www.packyapi.com/console' },
   { id: 'qwen', isWebSync: true, siteUrl: 'https://bailian.console.aliyun.com/' },
   { id: 'custom-usage', needsApiKey: true, needsBaseUrl: true, siteUrl: '' },
-  { id: 'custom-balance', needsApiKey: true, needsBaseUrl: true, siteUrl: '' },
+  { id: 'custom-balance', needsApiKey: true, needsBaseUrl: true, needsBalancePath: true, siteUrl: '' },
 ];
 
 function listProviderMeta() {
@@ -49,6 +56,7 @@ function listProviderMeta() {
     needsApiKey: false,
     needsAkSk: false,
     needsBaseUrl: false,
+    needsBalancePath: false,
     isWebSync: false,
     defaultBaseUrl: '',
     ...m,
