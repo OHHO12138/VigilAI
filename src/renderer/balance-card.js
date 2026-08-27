@@ -5,7 +5,8 @@ import { getEntry, getAlertCfg, balanceAlertLevel } from './state.js';
 import { buildCardHeader, buildErrorBody } from './monitor-card.js';
 
 function currencySymbol(monitor, data) {
-  const cur = monitor.currency || (data && data.currency) || 'CNY';
+  // 适配器返回的 currency 是数值的真实币种（如 OpenCode Zen 恒为 USD），优先于表单币种设置
+  const cur = (data && data.currency) || monitor.currency || 'CNY';
   if (cur === 'USD') return '$';
   return '¥'; // RMB / CNY
 }

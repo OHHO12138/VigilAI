@@ -2,7 +2,7 @@
 // usage：GET {baseUrl}/v1/token_plan/remains（Token Plan 订阅用量，5小时滚动窗口 + 每周，无 month）
 // balance：GET {baseUrl}/account/query_balance（按量付费账户，sk-api- 开头的 key）
 // 认证均为 Authorization: Bearer {apiKey}；baseUrl 可用 auth.baseUrl 覆盖（国际站 https://www.minimax.io）
-const { requestJson, toNumber } = require('./api-balance');
+const { requestConfiguredJson, toNumber } = require('./api-balance');
 
 const DEFAULT_BASE_URL = 'https://www.minimaxi.com';
 
@@ -91,12 +91,12 @@ function buildHeaders(monitor) {
 }
 
 async function fetchUsage(monitor) {
-  const json = await requestJson(buildUrl(monitor, '/v1/token_plan/remains'), { headers: buildHeaders(monitor) });
+  const json = await requestConfiguredJson(buildUrl(monitor, '/v1/token_plan/remains'), { headers: buildHeaders(monitor) });
   return parseTokenPlan(json);
 }
 
 async function fetchBalance(monitor) {
-  const json = await requestJson(buildUrl(monitor, '/account/query_balance'), { headers: buildHeaders(monitor) });
+  const json = await requestConfiguredJson(buildUrl(monitor, '/account/query_balance'), { headers: buildHeaders(monitor) });
   return parseMinimaxBalance(json);
 }
 
